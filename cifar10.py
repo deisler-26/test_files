@@ -2,10 +2,8 @@
 from keras.datasets import cifar10
 (X_train, Y_train), (X_test, Y_test) = cifar10.load_data()
 
-
 #CIFAR-10の正規化
 from keras.utils import to_categorical
-
 
 # 特徴量の正規化
 X_train = X_train/255.
@@ -18,6 +16,7 @@ Y_test = to_categorical(Y_test, 10)
 # CNNの構築
 import keras
 from keras.models import Sequential
+from keras.callbacks import EarlyStopping
 from keras.layers.convolutional import Conv2D, MaxPooling2D
 from keras.layers.core import Dense, Dropout, Activation, Flatten
 import numpy as np
@@ -45,16 +44,16 @@ model.add(Dropout(0.5))
 model.add(Dense(10))
 model.add(Activation('softmax'))
 
+early_stopping = EarlyStopping(monitor='val_loss', patience=2, verbose=1, mode='auto')
+
 # コンパイル
 model.compile(loss='categorical_crossentropy',optimizer='SGD',metrics=['accuracy'])
 
 #訓練
-history = model.fit(X_train, Y_train, epochs=100, validation_split=0.1)
+history = model.fit(X_train, Y_train, epochs=100, validation_split=0.1, callbacks=[early_stopping])
 
 # モデルの保存
 model.save('./CIFAR-10.h5')
-
-print(history.history.keys())
 
 #評価 & 評価結果出力
 print(model.evaluate(X_test, Y_test))
